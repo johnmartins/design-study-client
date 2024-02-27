@@ -10,7 +10,7 @@ from sklearn.gaussian_process.kernels import RBF
 def build_metamodel(df_train, input_cols, output_column, meta_model_type='gp', response_surface_degree=2,
                     response_surface_fit_intercept=False, gp_rbf_length_scale=1):
     """
-
+    Configure and build a new metamodel
     :param df_train: Pandas dataframe containing the training data
     :param input_cols: Array of column names that represent the inputs of the dataset
     :param output_column: Name of the column which the metamodel will be trained to predict.
