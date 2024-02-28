@@ -31,8 +31,8 @@ def build_metamodel(df_train, input_cols, output_column, meta_model_type='gp', r
 
 
 def build_response_surface(df_train, input_columns, output_column, deg=2, fit_intercept=False):
-    x = df_train[input_columns].values
-    y = df_train[[output_column]].values
+    x = df_train[input_columns]
+    y = df_train[[output_column]]
     metamodel = Pipeline([('poly', sklearn_preproc.PolynomialFeatures(degree=deg)),
                           ('linear', linear_model.LinearRegression(fit_intercept=fit_intercept))])
     metamodel.fit(x, y)
@@ -40,8 +40,8 @@ def build_response_surface(df_train, input_columns, output_column, deg=2, fit_in
 
 
 def build_gaussian_process(df_train, input_columns, output_column, rbf_length_scale=1):
-    x = df_train[input_columns].values
-    y = df_train[[output_column]].values
+    x = df_train[input_columns]
+    y = df_train[[output_column]]
 
     kernel = RBF(length_scale=rbf_length_scale, length_scale_bounds="fixed")
     metamodel = GaussianProcessRegressor(kernel=kernel, normalize_y=True)
@@ -50,7 +50,7 @@ def build_gaussian_process(df_train, input_columns, output_column, rbf_length_sc
 
 
 def evaluate_metamodel(df_test, metamodel, input_columns, output_column, error_calc='absolute',
-                       prediction_column=f"$PREDICTION$"):
+                       prediction_column=f"$PREDICTION$", verbose=True):
     """
     Evaluate meta model error using a test dataset
     :param df_test:
@@ -61,24 +61,26 @@ def evaluate_metamodel(df_test, metamodel, input_columns, output_column, error_c
     :param error_calc: Can be "absolute" or "squared"
     :return: (min_error, max_error, mean_error, std_dev_error)
     """
-    df_test[prediction_column] = metamodel.predict(df_test[input_columns])
+    df = df_test.copy()  # This turns df into an independent copy. Thus, changes to it will not damage original copy.
+    df[prediction_column] = metamodel.predict(df[input_columns])
 
     if error_calc == 'absolute':
-        df_test['ERROR'] = np.sqrt((df_test[output_column] - df_test[prediction_column])**2)
+        df['ERROR'] = np.sqrt((df[output_column] - df[prediction_column])**2)
     elif error_calc == 'squared':
-        df_test['ERROR'] = (df_test[output_column] - df_test[prediction_column])**2
+        df['ERROR'] = (df[output_column] - df[prediction_column])**2
     else:
         raise ValueError(f'Unknown error calculation type {error_calc}')
 
     # Prediction analysis
-    max_error = df_test['ERROR'].max()
-    min_error = df_test['ERROR'].min()
-    mean_error = df_test['ERROR'].mean()
-    std_dev_error = df_test['ERROR'].std()
+    max_error = df['ERROR'].max()
+    min_error = df['ERROR'].min()
+    mean_error = df['ERROR'].mean()
+    std_dev_error = df['ERROR'].std()
 
-    print(f'Min error:\t\t\t{min_error}')
-    print(f'Max error:\t\t\t{max_error}')
-    print(f'Mean error:\t\t\t{mean_error}')
-    print(f'Standard deviation (error):\t{std_dev_error}')
+    if verbose:
+        print(f'Min error:\t\t\t{min_error}')
+        print(f'Max error:\t\t\t{max_error}')
+        print(f'Mean error:\t\t\t{mean_error}')
+        print(f'Standard deviation (error):\t{std_dev_error}')
 
-    return min_error, max_error, mean_error, std_dev_error
+    return df, min_error, max_error, mean_error, std_dev_error
