@@ -35,7 +35,7 @@ def build_response_surface(df_train, input_columns, output_column, deg=2, fit_in
     y = df_train[[output_column]]
     metamodel = Pipeline([('poly', sklearn_preproc.PolynomialFeatures(degree=deg)),
                           ('linear', linear_model.LinearRegression(fit_intercept=fit_intercept))])
-    metamodel.fit(x, y)
+    metamodel.fit(x.values, y.values)
     return metamodel
 
 
@@ -45,7 +45,7 @@ def build_gaussian_process(df_train, input_columns, output_column, rbf_length_sc
 
     kernel = RBF(length_scale=rbf_length_scale, length_scale_bounds="fixed")
     metamodel = GaussianProcessRegressor(kernel=kernel, normalize_y=True)
-    metamodel.fit(x, y)
+    metamodel.fit(x.values, y.values)
     return metamodel
 
 
@@ -78,6 +78,7 @@ def evaluate_metamodel(df_test, metamodel, input_columns, output_column, error_c
     std_dev_error = df['ERROR'].std()
 
     if verbose:
+        print(f'\nPrediction of {output_column}:')
         print(f'Min error:\t\t\t{min_error}')
         print(f'Max error:\t\t\t{max_error}')
         print(f'Mean error:\t\t\t{mean_error}')
