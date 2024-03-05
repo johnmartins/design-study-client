@@ -30,7 +30,7 @@ def build_metamodel(df_train, input_cols, output_column, meta_model_type='gp', r
         raise ValueError(f'Unsupported meta model type "{meta_model_type}"')
 
 
-def build_response_surface(df_train, input_columns, output_column, deg=2, fit_intercept=False):
+def build_response_surface(df_train, input_columns, output_column, deg=3, fit_intercept=False):
     x = df_train[input_columns]
     y = df_train[[output_column]]
     metamodel = Pipeline([('poly', sklearn_preproc.PolynomialFeatures(degree=deg)),

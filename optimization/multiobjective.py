@@ -44,7 +44,7 @@ class Problem(ElementwiseProblem):
         out["F"] = f_outputs
 
 
-def optimize(problem: ElementwiseProblem, pop_size: int, n_gen: int = 100, seed: int = None, verbose: bool = True):
+def optimize(problem: ElementwiseProblem, pop_size: int, n_gen: int = 100, seed: int = 1, verbose: bool = True):
     algorithm = MixedVariableGA(pop_size=pop_size, survival=RankAndCrowdingSurvival())
     res = minimize(problem, algorithm, ("n_gen", n_gen), seed=seed, verbose=verbose)
     return res.X, res.F
