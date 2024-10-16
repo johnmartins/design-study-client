@@ -26,6 +26,8 @@ def build_metamodel(df_train, input_cols, output_column, meta_model_type='gp', r
                                       fit_intercept=response_surface_fit_intercept)
     if meta_model_type == 'gp':
         return build_gaussian_process(df_train, input_cols, output_column, rbf_length_scale=gp_rbf_length_scale)
+    if meta_model_type == 'ridge':
+        return build_ridge_model(df_train, input_cols, output_column)
     else:
         raise ValueError(f'Unsupported meta model type "{meta_model_type}"')
 
@@ -47,6 +49,14 @@ def build_gaussian_process(df_train, input_columns, output_column, rbf_length_sc
     metamodel = GaussianProcessRegressor(kernel=kernel, normalize_y=True)
     metamodel.fit(x.values, y.values)
     return metamodel
+
+
+def build_ridge_model(df_train, input_columns, output_column, alpha=0.5):
+    x = df_train[input_columns]
+    y = df_train[[output_column]]
+    lm = linear_model.Ridge(solver='auto')
+    lm.fit(x.values, y.values)
+    return lm
 
 
 def evaluate_metamodel(df_test, metamodel, input_columns, output_column, error_calc='absolute',
