@@ -37,7 +37,8 @@ def build_response_surface(df_train, input_columns, output_column, deg=3, fit_in
     y = df_train[[output_column]]
     metamodel = Pipeline([('poly', sklearn_preproc.PolynomialFeatures(degree=deg)),
                           ('linear', linear_model.LinearRegression(fit_intercept=fit_intercept))])
-    metamodel.fit(x.values, y.values)
+    metamodel.fit(x, y)
+
     return metamodel
 
 
@@ -54,7 +55,7 @@ def build_gaussian_process(df_train, input_columns, output_column, rbf_length_sc
 def build_ridge_model(df_train, input_columns, output_column, alpha=0.5):
     x = df_train[input_columns]
     y = df_train[[output_column]]
-    lm = linear_model.Ridge(solver='auto')
+    lm = linear_model.Ridge(solver='auto', alpha=alpha)
     lm.fit(x.values, y.values)
     return lm
 
